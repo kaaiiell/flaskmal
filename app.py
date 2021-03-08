@@ -98,21 +98,7 @@ def add_post():
 @app.route('/posts/more_info/<int:mal_id>',methods=['GET','POST'])
 def get_info(mal_id):
     url = "https://www.youtube.com/results?search_query="
-    #song_url={}
     anime_info = test.animeinfo(mal_id)
-    #if anime_info['opening_themes']:
-    #    for item in anime_info['opening_themes']:
-    #        song_url[item] = []
-    #        op = youtube.results(item)
-    #        for urlo in op:
-    #            song_url[item].append(urlo)
-
-    #if anime_info['ending_themes']:
-    #    for iteme in anime_info['ending_themes']:
-    #        song_url[iteme] = []
-    #        ed = youtube.results(iteme)
-    #        for urle in ed:
-    #            song_url[iteme].append(urle)
     return render_template('more_info.html',info = anime_info,songs = url)
         
 @app.route('/posts/season',methods=['GET','POST'])
