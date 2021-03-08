@@ -1,0 +1,56 @@
+{%extends 'base.html'%}
+
+{% block head %}
+<title>More Info</title>
+{% endblock %}
+
+{% block body %}
+<h2>{{info['title']}} {{info['mal_id']}}</h2>
+<img src={{info['image_url']}} alt="Card image cap">
+<h3>Theme Songs</h3>
+{% if info['opening_themes'] %}
+    <h5>Openings:</h5>
+    {% for i in range(0,info['opening_themes']|length) %}
+        {% set titleop = info['opening_themes'][i] %}
+        {% set ref = songs+titleop %}
+        <a href="{{ref}}">{{titleop}}</a>
+        <!--p></p>
+        {% for i in range(songs[titleop]|length) %}
+            <a href="{{songs[titleop][i]}}">{{songs[titleop][i]}}</a>
+            <br>
+            <iframe width="420" height="345" src="{{songs[titleop][i]}}"></iframe>
+            <br>
+        {% endfor %}  
+        <p></p-->  
+        <br>
+    {% endfor %}
+{% else %}
+    <p>Openings:</p>
+    <small>N/A</small>
+{% endif %}
+<br><br>
+{% if info['ending_themes'] %}
+    <h5>Endings:</h5>
+    {% for i in range(0,info['ending_themes']|length) %}
+        {% set titleed = info['ending_themes'][i] %}
+        {% set ref = songs+titleed %}
+        <a href="{{ref}}">{{titleed}}</a>
+        <!--p></p>
+        {% for i in range(songs[titleed]|length) %}
+            <a href="{{songs[titleed][i]}}">{{songs[titleed][i]}}</a>
+            <br>
+            <iframe width="420" height="345" src="{{songs[titleed][i]}}"></iframe>
+            <br>
+        {% endfor %}
+        <p></p-->   
+        <br>
+    {% endfor %}
+{% else %}
+    <p>Endings:</p>
+    <small>N/A</small>
+{% endif %}
+<br><br>
+<h4>Synopsis:</h4>
+<p>{{info['synopsis']}}</p>
+<a href={{info['url']}} class="btn btn-primary">MAL</a>
+{% endblock %}

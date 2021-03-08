@@ -1,0 +1,47 @@
+{%extends 'base.html'%}
+
+{% block head %}
+<style>
+.card {
+    height: 450px;
+    overflow-y: scroll;
+  }
+</style>
+<title>Vertical Card View</title>
+{% endblock %}
+
+{% block body %}
+<div class="album py-5 bg-light">
+    <div class="container">
+        <div class="row">
+            {% for i in range(0,anime|length) %}
+            {% if anime[i]['type'] == 'TV' %}
+            <div class="col-md-4" style="max-width: 1000px;">
+                <div class="card mb-4 box-shadow">
+                    <img class="card-img-top"
+                        src={{anime[i]['image_url']}}
+                        alt="Card image cap">
+                    <div class="card-body">
+                        <h5 class="card-title">{{anime[i]['title']}}</h5>
+                        <p>Genre: 
+                            {% for j in range(0,anime[i]['genres']|length) %}
+                                {{anime[i]['genres'][j]['name']}},
+                            {% endfor %}
+                        </p>
+                        <p class="card-text">{{anime[i]['synopsis']}}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-sm btn-outline-secondary">View</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary">Edit</button>
+                            </div>
+                            <small class="text-muted">9 mins</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

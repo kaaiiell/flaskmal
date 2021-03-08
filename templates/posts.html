@@ -1,0 +1,789 @@
+{%extends 'base.html'%}
+
+
+
+{% block head %}
+<title>Shows</title>
+<style>
+    .card {
+      box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+      transition: 0.3s;
+      width: 100%;
+      border-radius: 5px;
+      padding: 2px 16px;
+      height: 700px;
+      align-items: center;
+    }
+    
+    .card:hover {
+      box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+    }
+    
+    .container {
+      padding: 2px 16px;
+    }
+    .flex-container {
+        display:flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        overflow-x: scroll;
+        justify-content: stretch;
+    }
+    .flex-container > div {
+        flex-basis: 30rem;
+        flex-shrink: 0;
+    }
+    .card-text { 
+        height: 110px; 
+        overflow-y: scroll; 
+        width: 100%; 
+    }
+    .card-image-top {
+        box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+        align-items: center;
+    }
+    .imgdiv{
+        display: flex;
+        align-items: center;
+    }
+
+    
+
+</style>
+{% endblock %}
+
+
+
+{% block body %}
+<div>
+    <h1 style="display:inline">To Watch List:</h1>
+    <a style="display:inline" class="btn btn-success btn-sm float-right" href='/posts/new_post' role="button">+ Add Show</a>
+</div>
+<hr>
+
+
+{% for post in posts %}
+    <h2>Title:  {{post.title}}</h2>
+    {% if post.author %}
+        <small>Author:  {{post.author}} Date:   {{post.date_post}}</small>
+        <br><br>
+    {% else %}
+        <small>Author: N/A</small>
+        <br><br>
+    {% endif %}
+    <p style="white-space:pre-wrap">{{post.content}}</p>
+    <br>
+    <a class ="btn btn-success btn-sm" href='/posts/delete/{{post.id}}' role="button">Delete</a>
+    <a class ="btn btn-success btn-sm" href='/posts/edit/{{post.id}}' role="button">Edit</a>
+    <hr>
+{% endfor %}
+
+<!--div class="dropdown"style="display:inline">
+    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      2020
+    </button>
+    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+      <a class="dropdown-item" href="/posts/season?year=2020&season=summer">2020</a>
+      <a class="dropdown-item" href="#">2019</a>
+      <a class="dropdown-item" href="#">2018</a>
+    </div>
+  </div>
+  <div class="dropdown"style="display:inline">
+    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      Fall
+    </button>
+    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+      <a class="dropdown-item" href="/posts/season?year=2020&season=1">Winter</a>
+      <a class="dropdown-item" href="/posts/season?year=2020&season=2">Spring</a>
+      <a class="dropdown-item" href="/posts/season?year=2020&season=3">Summer</a>
+      <a class="dropdown-item" href="/posts/season?year=2020&season=4">Fall</a>
+    </div>
+  </div-->
+
+<form action='/posts/season' method='POST'>
+    <pre>   Year           Season             SortBy</pre>
+    <select class="custom-select" name='year' id="year" style="width:100px">
+        <option selected>{{year}}</option>
+        {% set num = allyear | int %}
+        {% for i in range(num,num-11,-1) %}
+            <option value="{{i}}">{{i}}</option>
+        {% endfor %}
+    </select>
+    <select class="custom-select" name='season' id="season" style="width:150px">
+        <option selected>{{season}}</option>
+        <option value="Winter">Winter</option>
+        <option value="Spring">Spring</option>
+        <option value="Summer">Summer</option>
+        <option value="Fall">Fall</option>
+    </select>
+    <select class="custom-select" name='option' id="option" style="width:150px">
+        <option selected>{{option}}</option>
+        <option value="Title">Title</option>
+        <option value="Score">Score</option>
+        <option value="Members">Members</option>
+        <option value="Countdown">Countdown</option>
+    </select>
+    <input class="btn btn-secondary btn-sm" type='submit' value='Find'>
+</form>
+
+
+
+<hr>
+<h1>{{season}} {{year}} Season</h1>
+<!--div class = flex-container>
+{% for i in range(0,anime|length) %}
+    {% if anime[i]['type'] == 'TV' %}
+        <div class="card">
+            <img src={{anime[i]['image_url']}} alt="Avatar" style="width:100%">
+            <h2>{{anime[i]['title']}}</h2>
+            <h4>Air Date: {{anime[i]['airing_start']}}</h4>
+            <p>Genre: 
+                {% for j in range(0,anime[i]['genres']|length) %}
+                    {{anime[i]['genres'][j]['name']}},
+                {% endfor %}
+            </p>
+            <p>{{anime[i]['synopsis']}}</p>
+        </div>    
+    {% endif %}
+{% endfor %}
+</div-->
+
+
+<script>
+    window.initializeClock = function (clockId, dateId) {
+        var getTimeRemaining = function (endtime) {
+            var t = (new Date(endtime)).getTime() - (new Date()).getTime();
+            var seconds = Math.floor((t / 1000) % 60);
+            var minutes = Math.floor((t / 1000 / 60) % 60);
+            var hours = Math.floor((t / (1000 * 60 * 60)) % 24);
+            var days = Math.floor(t / (1000 * 60 * 60 * 24));
+            return {
+                'total': t,
+                'days': days,
+                'hours': hours,
+                'minutes': minutes,
+                'seconds': seconds
+            };
+        }
+
+        var clock = document.getElementById(clockId);
+        var deadline = document.getElementById(dateId).value;
+        var timeinterval = setInterval(function () {
+            var t = getTimeRemaining(deadline);
+            clock.innerHTML = t.days + "d " + t.hours + "h "
+                + t.minutes + "m " + t.seconds + "s ";
+            if (t.total <= 0) {
+                clearInterval(timeinterval);
+            }
+        }, 1000);
+    }
+
+</script>
+
+
+<div class = "flex-container">
+{% for i in range(0,anime|length) %}
+    {% if anime[i]['type'] == 'TV' or anime[i]['type'] == 'Movie' %}
+        <div class="card border-dark mb-3" style="width: 20rem;">
+            {% set image = anime[i]['image_url'] %}
+            <!--img class="card-img-top" src={{image}} alt="Card image cap" style="width: 250px; height:250px;"-->
+            <img class="card-img-top" src={{image}} alt="Card image cap" style="object-fit: cover; width: 65%; height: 280px;">
+            <div class="card-body">
+                <h5 class="card-title">{{anime[i]['title']}}</h5>
+                {% if anime[i]['days_left'] %}
+                {% if anime[i]['days_left'] >  0 and anime[i]['days_left'] < 1000 %}
+                    <!--small style="display:inline">{{anime[i]['days_left']}} days</small>
+                    <small style="display:inline">{{anime[i]['hours_left']}} hours</small-->
+                    {% set lol = anime[i]['title'] %}
+                    {% set lmao = anime[i]['mal_id'] %}
+                    
+                    <input type="hidden" id="{{lmao}}" value="{{anime[i]['iso']}}">
+                    <img style="display: none;" src={{image}} onload="window.initializeClock('{{lol}}','{{lmao}}')">
+                    <small id="{{lol}}"></small>
+
+                {% endif %}
+                {% endif %}
+                <p>Starts: {{anime[i]['airing_start']}}, {{anime[i]['abbrv']}}</p>
+                <small>Score: {{anime[i]['score']}}</small>
+                <br>
+                <small>Members: {{anime[i]['members']}}</small>
+                <p>Genre: 
+                    {% for j in range(0,anime[i]['genres']|length) %}
+                        {{anime[i]['genres'][j]['name']}},
+                    {% endfor %}
+                </p>
+                <p class="card-text">{{anime[i]['synopsis']}}</p>
+                <a style="display:inline" href="/posts/more_info/{{anime[i]['mal_id']}}" class="btn btn-primary">More Info</a>
+                <a style="display:inline" href={{anime[i]['url']}} class="btn btn-primary">MAL</a>
+            </div>
+        </div>    
+    {% endif %}
+{% endfor %}
+</div>
+
+<br>
+<br>
+<hr>
+
+
+
+<script>
+function checkdayB(day) {
+    if (day == "Sunday"){ document.getElementById("SundayB").style.display = 'none'; }
+    if (day == "Monday"){ document.getElementById("MondayB").style.display = 'none'; }
+    if (day == "Tuesday"){ document.getElementById("TuesdayB").style.display = 'none'; }
+    if (day == "Wednesday"){ document.getElementById("WendesdayB").style.display = 'none'; }
+    if (day == "Thursday"){ document.getElementById("ThursdayB").style.display = 'none'; }
+    if (day == "Friday"){ document.getElementById("FridayB").style.display = 'none'; }
+    if (day == "Saturday"){ document.getElementById("SaturdayB").style.display = 'none'; }
+} 
+</script>
+
+<img style="display: none;" src="https://food.fnr.sndimg.com/content/dam/images/food/fullset/2009/6/15/0/JI_20731_s4x3.jpg.rend.hgtvcom.826.620.suffix/1589464308348.jpeg" onload="checkdayB('{{today}}')">
+
+
+<form action='/posts/schedule' method='POST'>
+    <select class="custom-select" name='year1' id="year1" style="display:none">
+        <option selected>{{year}}</option>
+    </select>
+    <select class="custom-select" name='season1' id="season1" style="display:none">
+        <option selected>{{season}}</option>
+    </select>
+    <select class="custom-select" name='option1' id="option1" style="display:none">
+        <option selected>{{option}}</option>
+    </select>
+    <input class="btn btn-success btn-sm" type='submit' value='Schedule'>
+</form>
+
+
+
+<!--a class ="btn btn-success btn-sm" href='/posts/schedule/{{option}}' role="button">Schedule</a-->
+<h1 id = "thedate">Shows Airing {{today}}</h1>
+
+
+<div style="display:inline" id="TodayB">
+    <button class ="btn btn-secondary btn-sm" onclick="days('{{today}}')">Today</button>
+</div>
+<div style="display:inline" id="SundayB">
+    <button class ="btn btn-secondary btn-sm" onclick="days('Sunday')">Sunday</button>
+</div>
+<div style="display:inline" id="MondayB">
+    <button class ="btn btn-secondary btn-sm" onclick="days('Monday')">Monday</button>
+</div>
+<div style="display:inline" id="TuesdayB">
+    <button class ="btn btn-secondary btn-sm" onclick="days('Tuesday')">Tuesday</button>
+</div>
+<div style="display:inline" id="WednesdayB">
+    <button class ="btn btn-secondary btn-sm" onclick="days('Wednesday')">Wendesday</button>
+</div>
+<div style="display:inline" id="ThursdayB">
+    <button class ="btn btn-secondary btn-sm" onclick="days('Thursday')">Thursday</button>
+</div>
+<div style="display:inline" id="FridayB">
+    <button class ="btn btn-secondary btn-sm" onclick="days('Friday')">Friday</button>
+</div>
+<div style="display:inline" id="SaturdayB">
+    <button class ="btn btn-secondary btn-sm" onclick="days('Saturday')">Saturday</button>
+</div>
+<br>
+<br>
+
+<div id="Today">
+<div class = "flex-container">
+    {% for i in range(0,anime|length) %}
+        {% if anime[i]['type'] == 'TV' or anime[i]['type'] == 'Movie' %}
+            {% if anime[i]['airing_start'] == today %}
+                <div class="card border-dark mb-3" style="width: 20rem;">
+                    {% set image = anime[i]['image_url'] %}
+                    <img class="card-img-top" src={{image}} alt="Card image cap" style="object-fit: cover; width: 65%; height: 280px;">
+                    <div class="card-body">
+                        <h5 class="card-title">{{anime[i]['title']}}</h5>
+                        {% if anime[i]['days_left'] %}
+                        {% if anime[i]['days_left'] >  0 %}
+                        <!--small style="display:inline">{{anime[i]['days_left']}} days</small>
+                        <small style="display:inline">{{anime[i]['hours_left']}} hours</small-->
+                        {% set lol = anime[i]['title'] %}
+                        {% set lmao = anime[i]['mal_id'] %}
+                        <input type="hidden" id="{{lmao}}0" value="{{anime[i]['iso']}}">
+                        <img style="display: none;" src={{image}} onload="window.initializeClock('{{lol}}0','{{lmao}}0')">
+                        <small id="{{lol}}0"></small>
+                        {% endif %}
+                        {% endif %}
+                        <p>Starts: {{anime[i]['airing_start']}}, {{anime[i]['abbrv']}}</p>
+                        <small>Score: {{anime[i]['score']}}</small>
+                        <br>
+                        <small>Members: {{anime[i]['members']}}</small>
+                        <p>Genre: 
+                            {% for j in range(0,anime[i]['genres']|length) %}
+                                {{anime[i]['genres'][j]['name']}},
+                            {% endfor %}
+                        </p>
+                        <p class="card-text">{{anime[i]['synopsis']}}</p>
+                        <a style="display:inline" href="/posts/more_info/{{anime[i]['mal_id']}}" class="btn btn-primary">More Info</a>
+                        <a style="display:inline" href={{anime[i]['url']}} class="btn btn-primary">MAL</a>
+                    </div>
+                </div> 
+            {% endif %}   
+        {% endif %}
+    {% endfor %}
+</div>
+</div>
+
+<div id="Sunday" style="display:none">
+    <div class="flex-container">
+        {% for i in range(0,anime|length) %}
+        {% if anime[i]['type'] == 'TV' or anime[i]['type'] == 'Movie' %}
+        {% if anime[i]['airing_start'] == "Sunday" %}
+        <div class="card border-dark mb-3" style="width: 20rem;">
+            {% set image = anime[i]['image_url'] %}
+            <img class="card-img-top" src={{image}} alt="Card image cap" style="object-fit: cover; width: 65%; height: 280px;">
+            <div class="card-body">
+                <h5 class="card-title">{{anime[i]['title']}}</h5>
+                {% if anime[i]['days_left'] %}
+                {% if anime[i]['days_left'] >  0 %}
+                <!--small style="display:inline">{{anime[i]['days_left']}} days</small>
+                            <small style="display:inline">{{anime[i]['hours_left']}} hours</small-->
+                {% set lol = anime[i]['title'] %}
+                {% set lmao = anime[i]['mal_id'] %}
+                <input type="hidden" id="{{lmao}}2" value="{{anime[i]['iso']}}">
+                <img style="display: none;" src={{image}} onload="window.initializeClock('{{lol}}2','{{lmao}}2')">
+                <small id="{{lol}}2"></small>
+                {% endif %}
+                {% endif %}
+                <p>Starts: {{anime[i]['airing_start']}}, {{anime[i]['abbrv']}}</p>
+                <small>Score: {{anime[i]['score']}}</small>
+                <br>
+                <small>Members: {{anime[i]['members']}}</small>
+                <p>Genre:
+                    {% for j in range(0,anime[i]['genres']|length) %}
+                    {{anime[i]['genres'][j]['name']}},
+                    {% endfor %}
+                </p>
+                <p class="card-text">{{anime[i]['synopsis']}}</p>
+                <a style="display:inline" href="/posts/more_info/{{anime[i]['mal_id']}}" class="btn btn-primary">More
+                    Info</a>
+                <a style="display:inline" href={{anime[i]['url']}} class="btn btn-primary">MAL</a>
+            </div>
+        </div>
+        {% endif %}
+        {% endif %}
+        {% endfor %}
+    </div>
+</div>
+<div id="Monday" style="display:none">
+    <div class="flex-container">
+        {% for i in range(0,anime|length) %}
+        {% if anime[i]['type'] == 'TV' or anime[i]['type'] == 'Movie' %}
+        {% if anime[i]['airing_start'] == "Monday" %}
+        <div class="card border-dark mb-3" style="width: 20rem;">
+            {% set image = anime[i]['image_url'] %}
+            <img class="card-img-top" src={{image}} alt="Card image cap" style="object-fit: cover; width: 65%; height: 280px;">
+            <div class="card-body">
+                <h5 class="card-title">{{anime[i]['title']}}</h5>
+                {% if anime[i]['days_left'] %}
+                {% if anime[i]['days_left'] >  0 %}
+                <!--small style="display:inline">{{anime[i]['days_left']}} days</small>
+                            <small style="display:inline">{{anime[i]['hours_left']}} hours</small-->
+                {% set lol = anime[i]['title'] %}
+                {% set lmao = anime[i]['mal_id'] %}
+                <input type="hidden" id="{{lmao}}2" value="{{anime[i]['iso']}}">
+                <img style="display: none;" src={{image}} onload="window.initializeClock('{{lol}}2','{{lmao}}2')">
+                <small id="{{lol}}2"></small>
+                {% endif %}
+                {% endif %}
+                <p>Starts: {{anime[i]['airing_start']}}, {{anime[i]['abbrv']}}</p>
+                <small>Score: {{anime[i]['score']}}</small>
+                <br>
+                <small>Members: {{anime[i]['members']}}</small>
+                <p>Genre:
+                    {% for j in range(0,anime[i]['genres']|length) %}
+                    {{anime[i]['genres'][j]['name']}},
+                    {% endfor %}
+                </p>
+                <p class="card-text">{{anime[i]['synopsis']}}</p>
+                <a style="display:inline" href="/posts/more_info/{{anime[i]['mal_id']}}" class="btn btn-primary">More
+                    Info</a>
+                <a style="display:inline" href={{anime[i]['url']}} class="btn btn-primary">MAL</a>
+            </div>
+        </div>
+        {% endif %}
+        {% endif %}
+        {% endfor %}
+    </div>
+</div>
+<div id="Tuesday" style="display:none">
+    <div class="flex-container">
+        {% for i in range(0,anime|length) %}
+        {% if anime[i]['type'] == 'TV' or anime[i]['type'] == 'Movie' %}
+        {% if anime[i]['airing_start'] == "Tuesday" %}
+        <div class="card border-dark mb-3" style="width: 20rem;">
+            {% set image = anime[i]['image_url'] %}
+            <img class="card-img-top" src={{image}} alt="Card image cap" style="object-fit: cover; width: 65%; height: 280px;">
+            <div class="card-body">
+                <h5 class="card-title">{{anime[i]['title']}}</h5>
+                {% if anime[i]['days_left'] %}
+                {% if anime[i]['days_left'] >  0 %}
+                <!--small style="display:inline">{{anime[i]['days_left']}} days</small>
+                            <small style="display:inline">{{anime[i]['hours_left']}} hours</small-->
+                {% set lol = anime[i]['title'] %}
+                {% set lmao = anime[i]['mal_id'] %}
+                <input type="hidden" id="{{lmao}}2" value="{{anime[i]['iso']}}">
+                <img style="display: none;" src={{image}} onload="window.initializeClock('{{lol}}2','{{lmao}}2')">
+                <small id="{{lol}}2"></small>
+                {% endif %}
+                {% endif %}
+                <p>Starts: {{anime[i]['airing_start']}}, {{anime[i]['abbrv']}}</p>
+                <small>Score: {{anime[i]['score']}}</small>
+                <br>
+                <small>Members: {{anime[i]['members']}}</small>
+                <p>Genre:
+                    {% for j in range(0,anime[i]['genres']|length) %}
+                    {{anime[i]['genres'][j]['name']}},
+                    {% endfor %}
+                </p>
+                <p class="card-text">{{anime[i]['synopsis']}}</p>
+                <a style="display:inline" href="/posts/more_info/{{anime[i]['mal_id']}}" class="btn btn-primary">More
+                    Info</a>
+                <a style="display:inline" href={{anime[i]['url']}} class="btn btn-primary">MAL</a>
+            </div>
+        </div>
+        {% endif %}
+        {% endif %}
+        {% endfor %}
+    </div>
+</div>
+<div id="Wednesday" style="display:none">
+    <div class="flex-container">
+        {% for i in range(0,anime|length) %}
+        {% if anime[i]['type'] == 'TV' or anime[i]['type'] == 'Movie' %}
+        {% if anime[i]['airing_start'] == "Wednesday" %}
+        <div class="card border-dark mb-3" style="width: 20rem;">
+            {% set image = anime[i]['image_url'] %}
+            <img class="card-img-top" src={{image}} alt="Card image cap" style="object-fit: cover; width: 65%; height: 280px;">
+            <div class="card-body">
+                <h5 class="card-title">{{anime[i]['title']}}</h5>
+                {% if anime[i]['days_left'] %}
+                {% if anime[i]['days_left'] >  0 %}
+                <!--small style="display:inline">{{anime[i]['days_left']}} days</small>
+                            <small style="display:inline">{{anime[i]['hours_left']}} hours</small-->
+                {% set lol = anime[i]['title'] %}
+                {% set lmao = anime[i]['mal_id'] %}
+                <input type="hidden" id="{{lmao}}2" value="{{anime[i]['iso']}}">
+                <img style="display: none;" src={{image}} onload="window.initializeClock('{{lol}}2','{{lmao}}2')">
+                <small id="{{lol}}2"></small>
+                {% endif %}
+                {% endif %}
+                <p>Starts: {{anime[i]['airing_start']}}, {{anime[i]['abbrv']}}</p>
+                <small>Score: {{anime[i]['score']}}</small>
+                <br>
+                <small>Members: {{anime[i]['members']}}</small>
+                <p>Genre:
+                    {% for j in range(0,anime[i]['genres']|length) %}
+                    {{anime[i]['genres'][j]['name']}},
+                    {% endfor %}
+                </p>
+                <p class="card-text">{{anime[i]['synopsis']}}</p>
+                <a style="display:inline" href="/posts/more_info/{{anime[i]['mal_id']}}" class="btn btn-primary">More
+                    Info</a>
+                <a style="display:inline" href={{anime[i]['url']}} class="btn btn-primary">MAL</a>
+            </div>
+        </div>
+        {% endif %}
+        {% endif %}
+        {% endfor %}
+    </div>
+</div>
+<div id="Thursday" style="display:none">
+    <div class="flex-container">
+        {% for i in range(0,anime|length) %}
+        {% if anime[i]['type'] == 'TV' or anime[i]['type'] == 'Movie' %}
+        {% if anime[i]['airing_start'] == "Thursday" %}
+        <div class="card border-dark mb-3" style="width: 20rem;">
+            {% set image = anime[i]['image_url'] %}
+            <img class="card-img-top" src={{image}} alt="Card image cap" style="object-fit: cover; width: 65%; height: 280px;">
+            <div class="card-body">
+                <h5 class="card-title">{{anime[i]['title']}}</h5>
+                {% if anime[i]['days_left'] %}
+                {% if anime[i]['days_left'] >  0 %}
+                <!--small style="display:inline">{{anime[i]['days_left']}} days</small>
+                            <small style="display:inline">{{anime[i]['hours_left']}} hours</small-->
+                {% set lol = anime[i]['title'] %}
+                {% set lmao = anime[i]['mal_id'] %}
+                <input type="hidden" id="{{lmao}}2" value="{{anime[i]['iso']}}">
+                <img style="display: none;" src={{image}} onload="window.initializeClock('{{lol}}2','{{lmao}}2')">
+                <small id="{{lol}}2"></small>
+                {% endif %}
+                {% endif %}
+                <p>Starts: {{anime[i]['airing_start']}}, {{anime[i]['abbrv']}}</p>
+                <small>Score: {{anime[i]['score']}}</small>
+                <br>
+                <small>Members: {{anime[i]['members']}}</small>
+                <p>Genre:
+                    {% for j in range(0,anime[i]['genres']|length) %}
+                    {{anime[i]['genres'][j]['name']}},
+                    {% endfor %}
+                </p>
+                <p class="card-text">{{anime[i]['synopsis']}}</p>
+                <a style="display:inline" href="/posts/more_info/{{anime[i]['mal_id']}}" class="btn btn-primary">More
+                    Info</a>
+                <a style="display:inline" href={{anime[i]['url']}} class="btn btn-primary">MAL</a>
+            </div>
+        </div>
+        {% endif %}
+        {% endif %}
+        {% endfor %}
+    </div>
+</div>
+<div id="Friday" style="display:none">
+    <div class="flex-container">
+        {% for i in range(0,anime|length) %}
+        {% if anime[i]['type'] == 'TV' or anime[i]['type'] == 'Movie' %}
+        {% if anime[i]['airing_start'] == "Friday" %}
+        <div class="card border-dark mb-3" style="width: 20rem;">
+            {% set image = anime[i]['image_url'] %}
+            <img class="card-img-top" src={{image}} alt="Card image cap" style="object-fit: cover; width: 65%; height: 280px;">
+            <div class="card-body">
+                <h5 class="card-title">{{anime[i]['title']}}</h5>
+                {% if anime[i]['days_left'] %}
+                {% if anime[i]['days_left'] >  0 %}
+                <!--small style="display:inline">{{anime[i]['days_left']}} days</small>
+                            <small style="display:inline">{{anime[i]['hours_left']}} hours</small-->
+                {% set lol = anime[i]['title'] %}
+                {% set lmao = anime[i]['mal_id'] %}
+                <input type="hidden" id="{{lmao}}2" value="{{anime[i]['iso']}}">
+                <img style="display: none;" src={{image}} onload="window.initializeClock('{{lol}}2','{{lmao}}2')">
+                <small id="{{lol}}2"></small>
+                {% endif %}
+                {% endif %}
+                <p>Starts: {{anime[i]['airing_start']}}, {{anime[i]['abbrv']}}</p>
+                <small>Score: {{anime[i]['score']}}</small>
+                <br>
+                <small>Members: {{anime[i]['members']}}</small>
+                <p>Genre:
+                    {% for j in range(0,anime[i]['genres']|length) %}
+                    {{anime[i]['genres'][j]['name']}},
+                    {% endfor %}
+                </p>
+                <p class="card-text">{{anime[i]['synopsis']}}</p>
+                <a style="display:inline" href="/posts/more_info/{{anime[i]['mal_id']}}" class="btn btn-primary">More
+                    Info</a>
+                <a style="display:inline" href={{anime[i]['url']}} class="btn btn-primary">MAL</a>
+            </div>
+        </div>
+        {% endif %}
+        {% endif %}
+        {% endfor %}
+    </div>
+</div>
+<div id="Saturday" style="display:none">
+    <div class="flex-container">
+        {% for i in range(0,anime|length) %}
+        {% if anime[i]['type'] == 'TV' or anime[i]['type'] == 'Movie' %}
+        {% if anime[i]['airing_start'] == "Saturday" %}
+        <div class="card border-dark mb-3" style="width: 20rem;">
+            {% set image = anime[i]['image_url'] %}
+            <img class="card-img-top" src={{image}} alt="Card image cap" style="object-fit: cover; width: 65%; height: 280px;">
+            <div class="card-body">
+                <h5 class="card-title">{{anime[i]['title']}}</h5>
+                {% if anime[i]['days_left'] %}
+                {% if anime[i]['days_left'] >  0 %}
+                <!--small style="display:inline">{{anime[i]['days_left']}} days</small>
+                            <small style="display:inline">{{anime[i]['hours_left']}} hours</small-->
+                {% set lol = anime[i]['title'] %}
+                {% set lmao = anime[i]['mal_id'] %}
+                <input type="hidden" id="{{lmao}}2" value="{{anime[i]['iso']}}">
+                <img style="display: none;" src={{image}} onload="window.initializeClock('{{lol}}2','{{lmao}}2')">
+                <small id="{{lol}}2"></small>
+                {% endif %}
+                {% endif %}
+                <p>Starts: {{anime[i]['airing_start']}}, {{anime[i]['abbrv']}}</p>
+                <small>Score: {{anime[i]['score']}}</small>
+                <br>
+                <small>Members: {{anime[i]['members']}}</small>
+                <p>Genre:
+                    {% for j in range(0,anime[i]['genres']|length) %}
+                    {{anime[i]['genres'][j]['name']}},
+                    {% endfor %}
+                </p>
+                <p class="card-text">{{anime[i]['synopsis']}}</p>
+                <a style="display:inline" href="/posts/more_info/{{anime[i]['mal_id']}}" class="btn btn-primary">More
+                    Info</a>
+                <a style="display:inline" href={{anime[i]['url']}} class="btn btn-primary">MAL</a>
+            </div>
+        </div>
+        {% endif %}
+        {% endif %}
+        {% endfor %}
+    </div>
+</div>
+
+<hr>
+<br>
+<small id="demo"></small>
+
+
+
+
+
+
+
+
+<!--
+
+<input type="hidden" id="myDateee" value="Jan 10, 2021 15:37:25">
+<button onclick="window.initializeClock('lmaooo','myDateee')">Click me</button>
+<p id="lmaooo"></p>
+<input type="hidden" id="myDatee" value="Jan 5, 2021 15:37:25">
+<button onclick="window.initializeClock('lmaoo','myDatee')">Click me</button>
+
+<p id="lmaoo"></p>
+
+
+
+
+
+<div id='countdown1'></div>
+<div id='countdown2'></div>
+
+
+<p>Click the "Try it" button to toggle between hiding and showing the DIV element:</p>
+
+<button onclick="myFunction()">Try it</button>
+
+<div id="myDIV">
+This is my DIV element.
+</div>
+
+
+
+<div class="dropdown">
+    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      Sort By:
+    </button>
+    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+      <a class="dropdown-item" href="#">Action</a>
+      <a class="dropdown-item" href="#">Another action</a>
+      <a class="dropdown-item" id="myLink" title="Click to do something"
+ href="#" onclick="MyFunction();return false;">countdown</a>
+    </div>
+  </div>
+
+<p><b>Note:</b> The element will not take up any space when the display property set to "none".</p>
+-->
+
+
+<script>
+    function myFunction() {
+      var x = document.getElementById("myDIV");
+      if (x.style.display === "none") {
+        x.style.display = "block";
+      } else {
+        x.style.display = "none";
+      }
+    }
+    function myFunctionM() {
+      var x = document.getElementById("Monday");
+      if (x.style.display === "none") {
+        x.style.display = "block";
+      } else {
+        x.style.display = "none";
+      }
+    }
+function days(day) {
+    if (day =="Sunday"){
+        document.getElementById("thedate").innerHTML = "Shows Airing "+day;
+        if (document.getElementById("Sunday").style.display == 'none') {
+                document.getElementById("Sunday").style.display = 'block';
+                document.getElementById("Today").style.display = 'none';   
+                document.getElementById("Monday").style.display = 'none';
+                document.getElementById("Tuesday").style.display = 'none';
+                document.getElementById("Wednesday").style.display = 'none';
+                document.getElementById("Thursday").style.display = 'none';
+                document.getElementById("Friday").style.display = 'none';
+                document.getElementById("Saturday").style.display = 'none';
+        }
+    }
+    else if (day=='Monday'){
+        document.getElementById("thedate").innerHTML = "Shows Airing "+day;
+        if (document.getElementById("Monday").style.display == 'none') {
+                document.getElementById("Monday").style.display = 'block'; 
+                document.getElementById("Today").style.display = 'none';  
+                document.getElementById("Sunday").style.display = 'none';
+                document.getElementById("Tuesday").style.display = 'none';
+                document.getElementById("Wednesday").style.display = 'none';
+                document.getElementById("Thursday").style.display = 'none';
+                document.getElementById("Friday").style.display = 'none';
+                document.getElementById("Saturday").style.display = 'none';
+        }
+    }
+    else if (day=='Tuesday'){
+        document.getElementById("thedate").innerHTML = "Shows Airing "+day;
+        if (document.getElementById("Tuesday").style.display == 'none') {
+                document.getElementById("Tuesday").style.display = 'block'; 
+                document.getElementById("Today").style.display = 'none';  
+                document.getElementById("Sunday").style.display = 'none';
+                document.getElementById("Monday").style.display = 'none';
+                document.getElementById("Wednesday").style.display = 'none';
+                document.getElementById("Thursday").style.display = 'none';
+                document.getElementById("Friday").style.display = 'none';
+                document.getElementById("Saturday").style.display = 'none';
+        }
+    }
+    else if (day=='Wednesday'){
+        document.getElementById("thedate").innerHTML = "Shows Airing "+day;
+        if (document.getElementById("Wednesday").style.display == 'none') {
+                document.getElementById("Wednesday").style.display = 'block'; 
+                document.getElementById("Today").style.display = 'none';  
+                document.getElementById("Sunday").style.display = 'none';
+                document.getElementById("Tuesday").style.display = 'none';
+                document.getElementById("Monday").style.display = 'none';
+                document.getElementById("Thursday").style.display = 'none';
+                document.getElementById("Friday").style.display = 'none';
+                document.getElementById("Saturday").style.display = 'none';
+        }
+    }
+    else if (day=='Thursday'){
+        document.getElementById("thedate").innerHTML = "Shows Airing "+day;
+        if (document.getElementById("Thursday").style.display == 'none') {
+                document.getElementById("Thursday").style.display = 'block'; 
+                document.getElementById("Today").style.display = 'none';  
+                document.getElementById("Sunday").style.display = 'none';
+                document.getElementById("Tuesday").style.display = 'none';
+                document.getElementById("Wednesday").style.display = 'none';
+                document.getElementById("Monday").style.display = 'none';
+                document.getElementById("Friday").style.display = 'none';
+                document.getElementById("Saturday").style.display = 'none';
+        }
+    }
+    else if (day=='Friday'){
+        document.getElementById("thedate").innerHTML = "Shows Airing "+day;
+        if (document.getElementById("Friday").style.display == 'none') {
+                document.getElementById("Friday").style.display = 'block'; 
+                document.getElementById("Today").style.display = 'none';  
+                document.getElementById("Sunday").style.display = 'none';
+                document.getElementById("Tuesday").style.display = 'none';
+                document.getElementById("Wednesday").style.display = 'none';
+                document.getElementById("Thursday").style.display = 'none';
+                document.getElementById("Monday").style.display = 'none';
+                document.getElementById("Saturday").style.display = 'none';
+        }
+    }
+    else if (day=='Saturday'){
+        document.getElementById("thedate").innerHTML = "Shows Airing "+day;
+        if (document.getElementById("Saturday").style.display == 'none') {
+                document.getElementById("Saturday").style.display = 'block'; 
+                document.getElementById("Today").style.display = 'none';  
+                document.getElementById("Sunday").style.display = 'none';
+                document.getElementById("Tuesday").style.display = 'none';
+                document.getElementById("Wednesday").style.display = 'none';
+                document.getElementById("Thursday").style.display = 'none';
+                document.getElementById("Friday").style.display = 'none';
+                document.getElementById("Monday").style.display = 'none';
+        }
+    }
+}
+
+
+
+</script>
+{% endblock %}
